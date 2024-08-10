@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  user-management-service:
+    build:
+      context: ./src/user-management-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=userdb
+      - DB_USER=user
+      - DB_PASSWORD=password
+    depends_on:
+      - postgres
+    volumes:
+      - ./user-management-service:/usr/src/app
+      - /usr/src/app/node_modules
+
+  video-service:
+    build:
+      context: ./video-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb://mongo:27017/videodb
+    depends_on:
+      - mongo
+    volumes:
+      - ./video-service:/usr/src/app
+      - /usr/src/app/node_modules
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:4.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  postgres_data:
+  mongo_data:
